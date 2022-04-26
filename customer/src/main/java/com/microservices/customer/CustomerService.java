@@ -1,5 +1,6 @@
 package com.microservices.customer;
 
+import com.microservices.amqp.RabbitMQMessageProducer;
 import com.microservices.clients.fraud.FraudCheckResponse;
 import com.microservices.clients.fraud.FraudClient;
 import com.microservices.clients.notification.NotificationClient;
@@ -15,7 +16,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final RestTemplate restTemplate;
     private final FraudClient fraudClient;
-    private final NotificationClient notificationClient;
+    private final RabbitMQMessageProducer rabbitMQMessageProducer;
 
     public void registerCustomer(CustomerRegistrationRequest request) {
         Customer customer = Customer.builder()  //builder from @lombok builder
@@ -35,13 +36,17 @@ public class CustomerService {
 
         //TODO: send notification
         //TODO: make it async, add to queue
-        notificationClient.sendNotification(
-                new NotificationRequest(
-                        customer.getId(),
-                        customer.getEmail(),
-                        String.format("Hi %s, welcome to Conrad's microservices demo...",
-                                customer.getFirstName())
-                        )
+        NotificationRequest notificationRequest = new NotificationRequest(
+                customer.getId(),
+                customer.getEmail(),
+                String.format("Hi %s, welcome to Conrad's microservices demo...",
+                        customer.getFirstName())
         );
+        rabbitMQMessageProducer.publish(
+                notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key"
+        );
+
     }
 }
