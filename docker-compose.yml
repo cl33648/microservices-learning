@@ -44,6 +44,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - rabbitmq
 
   eureka-server:
     image: crdl93/eureka-server:latest
@@ -70,10 +72,63 @@ services:
       - zipkin
       - eureka-server
 
+  customer:
+    image: crdl93/customer:latest
+    container_name: customer
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - spring
+      - postgres
+      - rabbitmq
+    depends_on:
+      - zipkin
+      - eureka-server
+      - postgres
+      - rabbitmq
+
+  fraud:
+    image: crdl93/fraud:latest
+    container_name: fraud
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - spring
+      - postgres
+      - rabbitmq
+    depends_on:
+      - zipkin
+      - eureka-server
+      - postgres
+      - rabbitmq
+
+  notification:
+    image: crdl93/notification:latest
+    container_name: notification
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - spring
+      - postgres
+      - rabbitmq
+    depends_on:
+      - zipkin
+      - eureka-server
+      - postgres
+      - rabbitmq
+
 networks:
   postgres:
     driver: bridge
   spring:
+    driver: bridge
+  rabbitmq:
     driver: bridge
 
 volumes:
