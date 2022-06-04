@@ -1,4 +1,6 @@
+com/microservices/customer/CustomerConfig.class
 com/microservices/customer/CustomerController.class
+com/microservices/customer/CustomerRepository.class
 com/microservices/customer/CustomerService.class
 com/microservices/customer/CustomerApplication.class
 com/microservices/customer/Customer$CustomerBuilder.class
